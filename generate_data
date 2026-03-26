@@ -1,0 +1,37 @@
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+
+products = ["Laptop", "Phone", "Shoes", "T-shirt", "Tablet"]
+categories = {
+    "Laptop": "Electronics",
+    "Phone": "Electronics",
+    "Tablet": "Electronics",
+    "Shoes": "Fashion",
+    "T-shirt": "Fashion"
+}
+cities = ["Chennai", "Bangalore", "Hyderabad"]
+
+data = []
+start_date = datetime(2024, 1, 1)
+
+for i in range(100):
+    product = random.choice(products)
+    data.append([
+        i,
+        start_date + timedelta(days=random.randint(0, 100)),
+        product,
+        categories[product],
+        random.randint(1, 5),
+        random.randint(500, 50000),
+        random.choice(cities)
+    ])
+
+df = pd.DataFrame(data, columns=[
+    "OrderID", "Date", "Product", "Category",
+    "Quantity", "Price", "City"
+])
+
+df.to_csv("sales_data.csv", index=False)
+
+print("✅ Data created")

@@ -1,0 +1,53 @@
+import pandas as pd
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+import plotly.express as px
+
+df = pd.read_csv("sales_data.csv")
+df["Revenue"] = df["Quantity"] * df["Price"]
+df["Date"] = pd.to_datetime(df["Date"])
+
+app = dash.Dash(__name__)
+
+app.layout = html.Div([
+    html.H1("📊 Sales Dashboard", style={"textAlign": "center"}),
+
+    dcc.Dropdown(
+        id="city",
+        options=[{"label": i, "value": i} for i in df["City"].unique()],
+        value=df["City"].unique()[0]
+    ),
+
+    html.H3(id="revenue"),
+
+    dcc.Graph(id="bar"),
+    dcc.Graph(id="pie"),
+    dcc.Graph(id="line"),
+])
+
+@app.callback(
+    Output("revenue", "children"),
+    Output("bar", "figure"),
+    Output("pie", "figure"),
+    Output("line", "figure"),
+    Input("city", "value")
+)
+def update(city):
+    dff = df[df["City"] == city]
+
+    revenue = dff["Revenue"].sum()
+
+    bar = px.bar(dff.groupby("Product")["Quantity"].sum().reset_index(),
+                 x="Product", y="Quantity")
+
+    pie = px.pie(dff.groupby("Category")["Revenue"].sum().reset_index(),
+                 names="Category", values="Revenue")
+
+    line = px.line(dff.groupby("Date")["Revenue"].sum().reset_index(),
+                   x="Date", y="Revenue")
+
+    return f"Total Revenue: ₹{revenue}", bar, pie, line
+
+if __name__ == "__main__":
+    app.run(debug=True)
